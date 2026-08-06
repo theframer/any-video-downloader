@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Downloaded / temporary media
+downloads/
+*.mp4
+*.webm
+*.mkv
+*.mp3
+*.m4a
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/

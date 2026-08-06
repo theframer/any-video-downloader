@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pure Video Downloader</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f6f8;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      .container {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        width: 400px;
+        text-align: center;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 1.5rem;
+        font-size: 24px;
+      }
+
+      input {
+        width: 80%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        font-size: 16px;
+        margin-bottom: 1rem;
+        outline: none;
+        transition: border-color 0.3s;
+      }
+
+      input:focus {
+        border-color: #4a90e2;
+      }
+
+      button {
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #357abd;
+      }
+
+      button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+
+      .status {
+        margin-top: 1rem;
+        font-size: 14px;
+        color: #666;
+        min-height: 20px;
+      }
+
+      .loading {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Video Downloader</h1>
+
+      <!-- Input Field -->
+      <input
+        type="text"
+        id="videoUrl"
+        placeholder="Paste any video link here..."
+      />
+
+      <button id="downloadBtn" onclick="startDownload()">Get Video File</button>
+
+      <div class="status" id="statusText"></div>
+    </div>
+    <script>
+        let resolveController = null;
+        let isProcessing = false;
+      
+      
+        async function startDownload() {
+      
+          const input =
+            document.getElementById("videoUrl");
+      
+          const btn =
+            document.getElementById("downloadBtn");
+      
+          const status =
+            document.getElementById("statusText");
+      
+      
+          // ========================================================
+          // STOP BUTTON
+          // ========================================================
+      
+          if (isProcessing) {
+      
+            if (resolveController) {
+              resolveController.abort();
+            }
+      
+            resolveController = null;
+            isProcessing = false;
+      
+            btn.innerText =
+              "Get Video File";
+      
+            btn.style.backgroundColor =
+              "";
+      
+            input.disabled =
+              false;
+      
+            status.innerText =
+              "Cancelled.";
+      
+            return;
+          }
+      
+      
+          // ========================================================
+          // START
+          // ========================================================
+      
+          const videoUrl =
+            input.value.trim();
+      
+      
+          if (!videoUrl) {
+      
+            status.innerText =
+              "Please paste a video URL to proceed.";
+      
+            return;
+          }
+      
+      
+          try {
+      
+            new URL(videoUrl);
+      
+          } catch {
+      
+            status.innerText =
+              "Oops! Please enter a valid URL.";
+      
+            return;
+          }
+      
+      
+          isProcessing =
+            true;
+      
+      
+          resolveController =
+            new AbortController();
+      
+      
+          // Lock URL while processing.
+      
+          input.disabled =
+            true;
+      
+      
+          // Button becomes STOP.
+      
+          btn.innerText =
+            "Stop";
+      
+      
+          btn.style.backgroundColor =
+            "#d9534f";
+      
+      
+          status.innerText =
+            "Finding original video source! Please wait...";
+      
+      
+          try {
+      
+            // ======================================================
+            // RESOLVE
+            // ======================================================
+      
+            const response =
+              await fetch(
+                "http://localhost:3001/resolve",
+                {
+                  method: "POST",
+      
+                  headers: {
+                    "Content-Type":
+                      "application/json"
+                  },
+      
+                  body: JSON.stringify({
+                    url: videoUrl
+                  }),
+      
+                  signal:
+                    resolveController.signal
+                }
+              );
+      
+      
+            const data =
+              await response.json();
+      
+      
+            if (
+              !response.ok ||
+              !data.success
+            ) {
+      
+              throw new Error(
+                data.error ||
+                "Could not find video."
+              );
+            }
+      
+      
+            // ======================================================
+            // RESOLVE FINISHED
+            // ======================================================
+      
+            isProcessing =
+              false;
+      
+      
+            resolveController =
+              null;
+      
+      
+            btn.innerText =
+              "Get Video File";
+      
+      
+            btn.style.backgroundColor =
+              "";
+      
+      
+            input.disabled =
+              false;
+      
+      
+            status.innerText =
+              "Video found. Starting download in any seconds...";
+      
+      
+            // ======================================================
+            // HAND DOWNLOAD TO CHROME
+            // ======================================================
+      
+            const iframe =
+              document.createElement(
+                "iframe"
+              );
+      
+      
+            iframe.style.display =
+              "none";
+      
+      
+            iframe.src =
+              data.downloadUrl;
+      
+      
+            document.body.appendChild(
+              iframe
+            );
+      
+      
+            setTimeout(() => {
+      
+              status.innerText =
+                "Download handed to Chrome.";
+      
+            }, 1200);
+      
+      
+            setTimeout(() => {
+      
+              iframe.remove();
+      
+            }, 60000);
+      
+      
+          } catch (error) {
+      
+            // ======================================================
+            // USER CANCELLED
+            // ======================================================
+      
+            if (
+              error.name ===
+              "AbortError"
+            ) {
+      
+              console.log(
+                "Download request cancelled."
+              );
+      
+              return;
+            }
+      
+      
+            // ======================================================
+            // ACTUAL ERROR
+            // ======================================================
+      
+            console.error(error);
+      
+      
+            status.innerText =
+              "Error: " +
+              error.message;
+      
+      
+            isProcessing =
+              false;
+      
+      
+            resolveController =
+              null;
+      
+      
+            input.disabled =
+              false;
+      
+      
+            btn.innerText =
+              "Get Video File";
+      
+      
+            btn.style.backgroundColor =
+              "";
+          }
+        }
+      </script>
+  </body>
+</html>
