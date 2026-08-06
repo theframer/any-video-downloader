@@ -1,361 +1,1380 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pure Video Downloader</title>
-    <style>
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f4f6f8;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>TruDev — Any Video Downloader</title>
+
+  <!-- Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --text: #10111a;
+      --muted: #697087;
+      --soft-muted: #8c92a5;
+      --accent: #536dfe;
+      --accent-2: #7655f6;
+      --border: rgba(20, 24, 40, 0.08);
+      --white: rgba(255, 255, 255, 0.82);
+      --black: #11131b;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Poppins", sans-serif;
+      color: var(--text);
+      overflow-x: hidden;
+
+      background:
+        radial-gradient(
+          circle at 8% 85%,
+          rgba(104, 123, 255, 0.14),
+          transparent 25%
+        ),
+        radial-gradient(
+          circle at 91% 70%,
+          rgba(154, 100, 255, 0.16),
+          transparent 27%
+        ),
+        radial-gradient(
+          circle at 78% 7%,
+          rgba(255, 195, 218, 0.16),
+          transparent 24%
+        ),
+        linear-gradient(
+          135deg,
+          #fbfcff 0%,
+          #f8f8ff 45%,
+          #fff9fc 100%
+        );
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+
+      background:
+        radial-gradient(
+          circle at 32% 40%,
+          rgba(95, 115, 255, 0.05),
+          transparent 22%
+        );
+
+      z-index: -1;
+    }
+
+    /* ========================================================
+       NAV
+    ======================================================== */
+
+    .nav {
+      width: 100%;
+      padding: 32px 5vw;
+
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.8px;
+
+      color: #11131b;
+      text-decoration: none;
+    }
+
+    .brand-dot {
+      width: 8px;
+      height: 8px;
+
+      margin-left: 5px;
+      margin-top: 8px;
+
+      border-radius: 50%;
+
+      background: linear-gradient(
+        135deg,
+        var(--accent),
+        var(--accent-2)
+      );
+    }
+
+    /* ========================================================
+       MAIN
+    ======================================================== */
+
+    .page {
+      min-height: calc(100vh - 100px);
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      padding: 45px 24px 30px;
+    }
+
+    .hero {
+      width: 100%;
+      max-width: 1050px;
+
+      text-align: center;
+    }
+
+    /* ========================================================
+       BADGE
+    ======================================================== */
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+
+      padding: 8px 15px;
+
+      border: 1px solid rgba(91, 101, 255, 0.24);
+      border-radius: 999px;
+
+      color: #5d64cc;
+
+      background: rgba(255, 255, 255, 0.42);
+
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+
+      box-shadow:
+        0 5px 20px rgba(79, 88, 170, 0.04);
+    }
+
+    .badge svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ========================================================
+       HERO
+    ======================================================== */
+
+    h1 {
+      margin-top: 27px;
+
+      font-size: clamp(42px, 5.5vw, 72px);
+      line-height: 1.08;
+
+      font-weight: 700;
+      letter-spacing: -3.5px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(
+        90deg,
+        #5075ff 0%,
+        #7257f5 52%,
+        #8b4ce6 100%
+      );
+
+      -webkit-background-clip: text;
+      background-clip: text;
+
+      color: transparent;
+    }
+
+    .subtitle {
+      margin-top: 18px;
+
+      font-size: 18px;
+      font-weight: 400;
+
+      color: var(--muted);
+    }
+
+    /* ========================================================
+       DOWNLOAD BAR
+    ======================================================== */
+
+    .download-shell {
+      width: 100%;
+      max-width: 890px;
+
+      margin: 47px auto 0;
+    }
+
+    .download-bar {
+      position: relative;
+
+      width: 100%;
+
+      display: flex;
+      align-items: center;
+
+      padding: 9px;
+
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 25px;
+
+      background: rgba(255, 255, 255, 0.78);
+
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+
+      box-shadow:
+        0 20px 50px rgba(61, 67, 118, 0.08),
+        0 3px 12px rgba(61, 67, 118, 0.04);
+    }
+
+    .link-icon {
+      flex: 0 0 auto;
+
+      margin-left: 20px;
+
+      color: #727b98;
+    }
+
+    .link-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    #videoUrl {
+      flex: 1;
+      min-width: 0;
+
+      padding: 20px 18px;
+
+      border: none;
+      outline: none;
+
+      background: transparent;
+
+      color: #272b3b;
+
+      font-family: "Poppins", sans-serif;
+      font-size: 15px;
+      font-weight: 400;
+    }
+
+    #videoUrl::placeholder {
+      color: #969caf;
+    }
+
+    #videoUrl:disabled {
+      color: #70768b;
+      cursor: not-allowed;
+    }
+
+    #downloadBtn {
+      flex: 0 0 auto;
+
+      min-width: 190px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+
+      padding: 18px 25px;
+
+      border: none;
+      border-radius: 18px;
+
+      background: linear-gradient(
+        135deg,
+        #171a25,
+        #090b12
+      );
+
+      color: #fff;
+
+      font-family: "Poppins", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 8px 22px rgba(10, 12, 20, 0.16);
+
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+    }
+
+    #downloadBtn:hover {
+      transform: translateY(-1px);
+
+      box-shadow:
+        0 12px 28px rgba(10, 12, 20, 0.2);
+    }
+
+    #downloadBtn:active {
+      transform: translateY(0);
+    }
+
+    #downloadBtn.stop-mode {
+      background: linear-gradient(
+        135deg,
+        #ee5b5b,
+        #d94242
+      );
+    }
+
+    #downloadBtn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========================================================
+       STATUS
+    ======================================================== */
+
+    .status {
+      min-height: 25px;
+
+      margin-top: 13px;
+
+      color: #747b91;
+
+      font-size: 13px;
+      font-weight: 400;
+
+      text-align: center;
+    }
+
+    .status.error {
+      color: #cf4848;
+    }
+
+    .status.success {
+      color: #53645b;
+    }
+
+    /* ========================================================
+       CONNECT
+    ======================================================== */
+
+    .connect {
+      margin-top: 28px;
+    }
+
+    .connect-title {
+      color: #667087;
+
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .socials {
+      margin-top: 15px;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .social {
+      width: 43px;
+      height: 43px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      border-radius: 13px;
+
+      background: rgba(255, 255, 255, 0.66);
+
+      color: #555e76;
+
+      text-decoration: none;
+
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+
+      box-shadow:
+        0 8px 20px rgba(57, 63, 101, 0.07);
+
+      transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .social:hover {
+      transform: translateY(-3px);
+
+      color: #4f5df5;
+
+      background: rgba(255, 255, 255, 0.92);
+
+      box-shadow:
+        0 12px 25px rgba(57, 63, 101, 0.11);
+    }
+
+    .social svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    /* ========================================================
+       FEATURES
+    ======================================================== */
+
+    .features {
+      width: 100%;
+      max-width: 830px;
+
+      margin: 72px auto 0;
+
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .feature {
+      position: relative;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+
+      padding: 0 28px;
+    }
+
+    .feature:not(:last-child)::after {
+      content: "";
+
+      position: absolute;
+
+      right: 0;
+      top: 8px;
+
+      width: 1px;
+      height: 43px;
+
+      background: rgba(63, 69, 100, 0.12);
+    }
+
+    .feature-icon {
+      flex: 0 0 auto;
+
+      color: #5866ff;
+    }
+
+    .feature-icon svg {
+      width: 29px;
+      height: 29px;
+
+      stroke-width: 1.8;
+    }
+
+    .feature-text {
+      text-align: left;
+    }
+
+    .feature-title {
+      color: #181a24;
+
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .feature-description {
+      margin-top: 3px;
+
+      color: #7e8498;
+
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    /* ========================================================
+       FOOTER
+    ======================================================== */
+
+    footer {
+      width: 100%;
+      max-width: 1100px;
+
+      margin-top: auto;
+      padding-top: 90px;
+    }
+
+    .footer-line {
+      width: 100%;
+      height: 1px;
+
+      background: rgba(42, 48, 76, 0.07);
+    }
+
+    .footer-content {
+      padding: 24px 0 10px;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 22px;
+
+      color: #777e93;
+
+      font-size: 11px;
+    }
+
+    .footer-divider {
+      width: 1px;
+      height: 14px;
+
+      background: rgba(42, 48, 76, 0.15);
+    }
+
+    .heart {
+      color: #7058ee;
+    }
+
+    /* ========================================================
+       RESPONSIVE
+    ======================================================== */
+
+    @media (max-width: 760px) {
+
+      .nav {
+        padding: 24px;
       }
 
-      .container {
-        background: white;
-        padding: 2rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        width: 400px;
-        text-align: center;
+      .page {
+        padding-top: 35px;
       }
 
       h1 {
-        color: #333;
-        margin-bottom: 1.5rem;
-        font-size: 24px;
+        font-size: 43px;
+        letter-spacing: -2.5px;
       }
 
-      input {
-        width: 80%;
-        padding: 12px;
-        border: 2px solid #ddd;
-        border-radius: 6px;
-        font-size: 16px;
-        margin-bottom: 1rem;
-        outline: none;
-        transition: border-color 0.3s;
+      .subtitle {
+        font-size: 15px;
       }
 
-      input:focus {
-        border-color: #4a90e2;
+      .download-shell {
+        margin-top: 36px;
       }
 
-      button {
-        background-color: #4a90e2;
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        font-size: 16px;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: background-color 0.3s;
+      .download-bar {
+        padding: 8px;
+        border-radius: 20px;
       }
 
-      button:hover {
-        background-color: #357abd;
+      .link-icon {
+        margin-left: 13px;
       }
 
-      button:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
+      #videoUrl {
+        padding: 17px 10px;
+        font-size: 13px;
       }
 
-      .status {
-        margin-top: 1rem;
-        font-size: 14px;
-        color: #666;
-        min-height: 20px;
+      #downloadBtn {
+        min-width: 145px;
+
+        padding: 16px 17px;
+
+        border-radius: 15px;
+
+        font-size: 12px;
       }
 
-      .loading {
+      .features {
+        margin-top: 55px;
+
+        grid-template-columns: 1fr;
+
+        gap: 28px;
+      }
+
+      .feature {
+        justify-content: flex-start;
+
+        max-width: 260px;
+
+        margin: auto;
+      }
+
+      .feature:not(:last-child)::after {
         display: none;
       }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>Video Downloader</h1>
 
-      <!-- Input Field -->
-      <input
-        type="text"
-        id="videoUrl"
-        placeholder="Paste any video link here..."
-      />
+      footer {
+        padding-top: 65px;
+      }
+    }
 
-      <button id="downloadBtn" onclick="startDownload()">Get Video File</button>
+    @media (max-width: 520px) {
 
-      <div class="status" id="statusText"></div>
-    </div>
-    <script>
-        let resolveController = null;
-        let isProcessing = false;
-      
-      
-        async function startDownload() {
-      
-          const input =
-            document.getElementById("videoUrl");
-      
-          const btn =
-            document.getElementById("downloadBtn");
-      
-          const status =
-            document.getElementById("statusText");
-      
-      
-          // ========================================================
-          // STOP BUTTON
-          // ========================================================
-      
-          if (isProcessing) {
-      
-            if (resolveController) {
-              resolveController.abort();
+      .brand {
+        font-size: 19px;
+      }
+
+      .page {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      h1 {
+        font-size: 37px;
+      }
+
+      .subtitle {
+        font-size: 14px;
+      }
+
+      .download-bar {
+        flex-wrap: wrap;
+
+        padding: 9px;
+      }
+
+      .link-icon {
+        margin-left: 10px;
+      }
+
+      #videoUrl {
+        width: calc(100% - 45px);
+      }
+
+      #downloadBtn {
+        width: 100%;
+
+        margin-top: 3px;
+
+        min-width: 0;
+      }
+
+      .footer-content {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .footer-divider {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ======================================================
+       BRAND
+  ======================================================= -->
+
+  <nav class="nav">
+    <a class="brand" href="#">
+      TRUDEV<span class="brand-dot"></span>
+    </a>
+  </nav>
+
+
+  <!-- ======================================================
+       PAGE
+  ======================================================= -->
+
+  <main class="page">
+
+    <section class="hero">
+
+      <div class="badge">
+        <i data-lucide="zap"></i>
+        FAST • SIMPLE • PREMIUM
+      </div>
+
+
+      <h1>
+        Any Video
+        <span class="gradient-text">Downloader</span>
+      </h1>
+
+
+      <p class="subtitle">
+        Paste a link. Get your video. That's it.
+      </p>
+
+
+      <!-- ==================================================
+           DOWNLOAD
+      =================================================== -->
+
+      <div class="download-shell">
+
+        <div class="download-bar">
+
+          <div class="link-icon">
+            <i data-lucide="link-2"></i>
+          </div>
+
+
+          <input
+            type="text"
+            id="videoUrl"
+            placeholder="Paste any video link here..."
+            autocomplete="off"
+          />
+
+
+          <button
+            id="downloadBtn"
+            onclick="startDownload()"
+          >
+            <span id="buttonText">
+              Get Video File
+            </span>
+
+            <i
+              id="buttonIcon"
+              data-lucide="arrow-right"
+            ></i>
+          </button>
+
+        </div>
+
+
+        <div
+          class="status"
+          id="statusText"
+        ></div>
+
+      </div>
+
+
+      <!-- ==================================================
+           CONNECT WITH US
+      =================================================== -->
+
+      <div class="connect">
+
+        <div class="connect-title">
+          Connect with us
+        </div>
+
+
+        <div class="socials">
+
+            <!-- Instagram -->
+            <a
+              class="social"
+              href="https://instagram.com/amal_dv_/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              title="Instagram"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="5"/>
+                <circle cx="12" cy="12" r="4"/>
+                <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+              </svg>
+            </a>
+          
+          
+            <!-- LinkedIn -->
+            <a
+              class="social"
+              href="https://www.linkedin.com/in/amal-dev-anilkumar-295071216/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="LinkedIn"
+              title="LinkedIn"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6.5 8.5H3.3V19H6.5V8.5ZM4.9 3A1.9 1.9 0 1 0 4.9 6.8A1.9 1.9 0 0 0 4.9 3ZM20.7 13C20.7 9.8 19 8.3 16.7 8.3C14.8 8.3 14 9.3 13.5 10V8.5H10.3V19H13.5V13.8C13.5 12.4 13.8 11 15.6 11C17.3 11 17.4 12.6 17.4 13.9V19H20.7V13Z"/>
+              </svg>
+            </a>
+          
+          
+            <!-- GitHub -->
+            <a
+              class="social"
+              href="https://github.com/theframer"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub"
+              title="GitHub"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.58 2 12.23C2 16.75 4.87 20.58 8.84 21.94C9.34 22.03 9.52 21.72 9.52 21.46C9.52 21.22 9.51 20.42 9.51 19.58C6.73 20.2 6.14 18.37 6.14 18.37C5.68 17.18 5.03 16.86 5.03 16.86C4.12 16.22 5.1 16.24 5.1 16.24C6.1 16.31 6.63 17.3 6.63 17.3C7.52 18.87 8.97 18.42 9.54 18.16C9.63 17.5 9.89 17.04 10.17 16.78C7.95 16.52 5.62 15.64 5.62 11.72C5.62 10.6 6.01 9.69 6.65 8.97C6.55 8.71 6.2 7.67 6.75 6.26C6.75 6.26 7.59 5.98 9.5 7.31C10.3 7.08 11.15 6.96 12 6.96C12.85 6.96 13.7 7.08 14.5 7.31C16.41 5.98 17.25 6.26 17.25 6.26C17.8 7.67 17.45 8.71 17.35 8.97C17.99 9.69 18.38 10.6 18.38 11.72C18.38 15.65 16.04 16.51 13.81 16.77C14.17 17.09 14.49 17.72 14.49 18.69C14.49 20.08 14.48 21.2 14.48 21.54C14.48 21.81 14.66 22.12 15.17 22.02C19.13 20.66 22 16.74 22 12.23C22 6.58 17.52 2 12 2Z"/>
+              </svg>
+            </a>
+          
+          
+            <!-- Website -->
+            <a
+              class="social"
+              href="https://theframer.github.io/amaldevanilkumar/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Website"
+              title="Website"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M3 12h18"/>
+                <path d="M12 3c2.3 2.5 3.5 5.5 3.5 9S14.3 18.5 12 21"/>
+                <path d="M12 3C9.7 5.5 8.5 8.5 8.5 12S9.7 18.5 12 21"/>
+              </svg>
+            </a>
+          
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==================================================
+           FEATURES
+      =================================================== -->
+
+      <div class="features">
+
+        <div class="feature">
+
+            <div class="feature-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="2.5" y="5" width="19" height="14" rx="3"></rect>
+              
+                  <path d="M7 9v6"></path>
+                  <path d="M11 9v6"></path>
+                  <path d="M7 12h4"></path>
+              
+                  <path d="M15 9v6"></path>
+                  <path d="M15 9h1.5a3 3 0 0 1 0 6H15"></path>
+                </svg>
+              </div>
+
+          <div class="feature-text">
+
+            <div class="feature-title">
+              Orginal Quality
+            </div>
+
+            <div class="feature-description">
+              Best available combined quality
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="feature">
+
+          <div class="feature-icon">
+            <i data-lucide="zap"></i>
+          </div>
+
+          <div class="feature-text">
+
+            <div class="feature-title">
+              Stable Download
+            </div>
+
+            <div class="feature-description">
+              Direct browser streaming
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="feature">
+
+          <div class="feature-icon">
+            <i data-lucide="shield-check"></i>
+          </div>
+
+          <div class="feature-text">
+
+            <div class="feature-title">
+              Simple & Private
+            </div>
+
+            <div class="feature-description">
+              No permanent media storage
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ====================================================
+         FOOTER
+    ===================================================== -->
+
+    <footer>
+
+      <div class="footer-line"></div>
+
+      <div class="footer-content">
+
+        <span>
+          © 2026 TruDev. All rights reserved.
+        </span>
+
+        <span class="footer-divider"></span>
+
+        <span>
+          Built with
+          <span class="heart">♥</span>
+          by TruDev
+        </span>
+
+      </div>
+
+    </footer>
+
+  </main>
+
+
+  <!-- ======================================================
+       DOWNLOAD LOGIC
+  ======================================================= -->
+
+  <script>
+
+    // ========================================================
+    // CONFIGURATION
+    // ========================================================
+
+    const API_BASE =
+      "http://localhost:3001";
+
+
+    let resolveController = null;
+    let isProcessing = false;
+
+
+    // ========================================================
+    // ICON REFRESH
+    // ========================================================
+
+    function refreshIcons() {
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+
+    refreshIcons();
+
+
+    // ========================================================
+    // BUTTON STATE
+    // ========================================================
+
+    function setButtonState(mode) {
+
+      const btn =
+        document.getElementById("downloadBtn");
+
+      const buttonText =
+        document.getElementById("buttonText");
+
+      const buttonIcon =
+        document.getElementById("buttonIcon");
+
+
+      if (mode === "stop") {
+
+        btn.classList.add("stop-mode");
+
+        buttonText.innerText =
+          "Stop";
+
+        buttonIcon.setAttribute(
+          "data-lucide",
+          "square"
+        );
+
+      } else {
+
+        btn.classList.remove("stop-mode");
+
+        buttonText.innerText =
+          "Get Video File";
+
+        buttonIcon.setAttribute(
+          "data-lucide",
+          "arrow-right"
+        );
+      }
+
+
+      refreshIcons();
+    }
+
+
+    // ========================================================
+    // STATUS
+    // ========================================================
+
+    function setStatus(
+      message,
+      type = ""
+    ) {
+
+      const status =
+        document.getElementById("statusText");
+
+
+      status.innerText =
+        message;
+
+
+      status.className =
+        "status";
+
+
+      if (type) {
+        status.classList.add(type);
+      }
+    }
+
+
+    // ========================================================
+    // DOWNLOAD
+    // ========================================================
+
+    async function startDownload() {
+
+      const input =
+        document.getElementById("videoUrl");
+
+
+      // ======================================================
+      // STOP
+      // ======================================================
+
+      if (isProcessing) {
+
+        if (resolveController) {
+          resolveController.abort();
+        }
+
+
+        resolveController =
+          null;
+
+
+        isProcessing =
+          false;
+
+
+        input.disabled =
+          false;
+
+
+        setButtonState("normal");
+
+
+        setStatus(
+          "Cancelled."
+        );
+
+
+        return;
+      }
+
+
+      // ======================================================
+      // VALIDATE
+      // ======================================================
+
+      const videoUrl =
+        input.value.trim();
+
+
+      if (!videoUrl) {
+
+        setStatus(
+          "Please paste a video URL to proceed.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      try {
+
+        const parsed =
+          new URL(videoUrl);
+
+
+        if (
+          parsed.protocol !== "http:" &&
+          parsed.protocol !== "https:"
+        ) {
+
+          throw new Error();
+        }
+
+      } catch {
+
+        setStatus(
+          "Please enter a valid video URL.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      // ======================================================
+      // START RESOLVE
+      // ======================================================
+
+      isProcessing =
+        true;
+
+
+      resolveController =
+        new AbortController();
+
+
+      input.disabled =
+        true;
+
+
+      setButtonState("stop");
+
+
+      setStatus(
+        "Finding original video source..."
+      );
+
+
+      try {
+
+        const response =
+          await fetch(
+            `${API_BASE}/resolve`,
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+                url: videoUrl
+              }),
+
+              signal:
+                resolveController.signal
             }
-      
-            resolveController = null;
-            isProcessing = false;
-      
-            btn.innerText =
-              "Get Video File";
-      
-            btn.style.backgroundColor =
-              "";
-      
-            input.disabled =
-              false;
-      
-            status.innerText =
-              "Cancelled.";
-      
-            return;
-          }
-      
-      
-          // ========================================================
-          // START
-          // ========================================================
-      
-          const videoUrl =
-            input.value.trim();
-      
-      
-          if (!videoUrl) {
-      
-            status.innerText =
-              "Please paste a video URL to proceed.";
-      
-            return;
-          }
-      
-      
-          try {
-      
-            new URL(videoUrl);
-      
-          } catch {
-      
-            status.innerText =
-              "Oops! Please enter a valid URL.";
-      
-            return;
-          }
-      
-      
-          isProcessing =
-            true;
-      
-      
-          resolveController =
-            new AbortController();
-      
-      
-          // Lock URL while processing.
-      
-          input.disabled =
-            true;
-      
-      
-          // Button becomes STOP.
-      
-          btn.innerText =
-            "Stop";
-      
-      
-          btn.style.backgroundColor =
-            "#d9534f";
-      
-      
-          status.innerText =
-            "Finding original video source! Please wait...";
-      
-      
-          try {
-      
-            // ======================================================
-            // RESOLVE
-            // ======================================================
-      
-            const response =
-              await fetch(
-                "http://localhost:3001/resolve",
-                {
-                  method: "POST",
-      
-                  headers: {
-                    "Content-Type":
-                      "application/json"
-                  },
-      
-                  body: JSON.stringify({
-                    url: videoUrl
-                  }),
-      
-                  signal:
-                    resolveController.signal
-                }
-              );
-      
-      
-            const data =
-              await response.json();
-      
-      
-            if (
-              !response.ok ||
-              !data.success
-            ) {
-      
-              throw new Error(
-                data.error ||
-                "Could not find video."
-              );
-            }
-      
-      
-            // ======================================================
-            // RESOLVE FINISHED
-            // ======================================================
-      
-            isProcessing =
-              false;
-      
-      
-            resolveController =
-              null;
-      
-      
-            btn.innerText =
-              "Get Video File";
-      
-      
-            btn.style.backgroundColor =
-              "";
-      
-      
-            input.disabled =
-              false;
-      
-      
-            status.innerText =
-              "Video found. Starting download in any seconds...";
-      
-      
-            // ======================================================
-            // HAND DOWNLOAD TO CHROME
-            // ======================================================
-      
-            const iframe =
-              document.createElement(
-                "iframe"
-              );
-      
-      
-            iframe.style.display =
-              "none";
-      
-      
-            iframe.src =
-              data.downloadUrl;
-      
-      
-            document.body.appendChild(
-              iframe
-            );
-      
-      
-            setTimeout(() => {
-      
-              status.innerText =
-                "Download handed to Chrome.";
-      
-            }, 1200);
-      
-      
-            setTimeout(() => {
-      
-              iframe.remove();
-      
-            }, 60000);
-      
-      
-          } catch (error) {
-      
-            // ======================================================
-            // USER CANCELLED
-            // ======================================================
-      
-            if (
-              error.name ===
-              "AbortError"
-            ) {
-      
-              console.log(
-                "Download request cancelled."
-              );
-      
-              return;
-            }
-      
-      
-            // ======================================================
-            // ACTUAL ERROR
-            // ======================================================
-      
-            console.error(error);
-      
-      
-            status.innerText =
-              "Error: " +
-              error.message;
-      
-      
-            isProcessing =
-              false;
-      
-      
-            resolveController =
-              null;
-      
-      
-            input.disabled =
-              false;
-      
-      
-            btn.innerText =
-              "Get Video File";
-      
-      
-            btn.style.backgroundColor =
-              "";
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (
+          !response.ok ||
+          !data.success
+        ) {
+
+          throw new Error(
+            data.error ||
+            "Could not find video."
+          );
+        }
+
+
+        // ====================================================
+        // RESOLVE FINISHED
+        // ====================================================
+
+        isProcessing =
+          false;
+
+
+        resolveController =
+          null;
+
+
+        input.disabled =
+          false;
+
+
+        setButtonState("normal");
+
+
+        setStatus(
+          "Video found. Starting download..."
+        );
+
+
+        // ====================================================
+        // HAND TO BROWSER
+        // ====================================================
+
+        const iframe =
+          document.createElement(
+            "iframe"
+          );
+
+
+        iframe.style.display =
+          "none";
+
+
+        iframe.src =
+          data.downloadUrl;
+
+
+        document.body.appendChild(
+          iframe
+        );
+
+
+        setTimeout(() => {
+
+          setStatus(
+            "Download handed to your browser.",
+            "success"
+          );
+
+        }, 1200);
+
+
+        setTimeout(() => {
+
+          iframe.remove();
+
+        }, 60000);
+
+
+      } catch (error) {
+
+        // ====================================================
+        // USER CANCELLED
+        // ====================================================
+
+        if (
+          error.name ===
+          "AbortError"
+        ) {
+
+          console.log(
+            "Video extraction cancelled."
+          );
+
+          return;
+        }
+
+
+        // ====================================================
+        // ERROR
+        // ====================================================
+
+        console.error(error);
+
+
+        isProcessing =
+          false;
+
+
+        resolveController =
+          null;
+
+
+        input.disabled =
+          false;
+
+
+        setButtonState("normal");
+
+
+        setStatus(
+          "Error: " +
+          error.message,
+          "error"
+        );
+      }
+    }
+
+
+    // ========================================================
+    // ENTER KEY
+    // ========================================================
+
+    document
+      .getElementById("videoUrl")
+      .addEventListener(
+        "keydown",
+        event => {
+
+          if (
+            event.key === "Enter" &&
+            !isProcessing
+          ) {
+
+            startDownload();
           }
         }
-      </script>
-  </body>
+      );
+
+  </script>
+
+</body>
 </html>
