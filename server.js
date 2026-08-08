@@ -881,7 +881,7 @@ app.post("/resolve", async (req, res) => {
         fileSize: expectedSize || null,
       },
 
-      downloadUrl: `https://videodownloader-vq3m.onrender.com/stream/${token}`,
+      downloadUrl: `https://videodownloader.trudev.in/stream/${token}`,
     });
   } catch (error) {
     // ========================================================
