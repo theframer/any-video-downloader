@@ -1224,6 +1224,8 @@
           );
 
 
+
+
         const data =
           await response.json();
 
@@ -1264,44 +1266,46 @@
         );
 
 
-        // ====================================================
-        // HAND TO BROWSER
-        // ====================================================
+// ======================================================
+// HAND DOWNLOAD TO CHROME
+// ======================================================
 
-        const iframe =
-          document.createElement(
-            "iframe"
-          );
-
-
-        iframe.style.display =
-          "none";
+setStatus(
+  "Video ready. Starting download..."
+);
 
 
-        iframe.src =
-          data.downloadUrl;
+// Hidden iframe requests /stream/:token without
+// navigating or refreshing the TruDev page.
+
+const downloadFrame =
+  document.createElement("iframe");
+
+downloadFrame.style.display =
+  "none";
+
+downloadFrame.src =
+  data.downloadUrl;
+
+document.body.appendChild(
+  downloadFrame
+);
 
 
-        document.body.appendChild(
-          iframe
-        );
+// Keep iframe alive while Chrome receives the file.
+// Remove it later after the transfer has had time to start.
+
+setTimeout(() => {
+
+  downloadFrame.remove();
+
+}, 10 * 60 * 1000);
 
 
-        setTimeout(() => {
-
-          setStatus(
-            "Download handed to your browser.",
-            "success"
-          );
-
-        }, 1200);
-
-
-        setTimeout(() => {
-
-          iframe.remove();
-
-        }, 60000);
+setStatus(
+  "Download started.",
+  "success"
+);
 
 
       } catch (error) {
